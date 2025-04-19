@@ -30,6 +30,7 @@
 #include "utils_math.h"
 #include "Fusion.h"
 #include "digital_filter.h"
+#include "dmu11.h"
 
 #include <math.h>
 #include <string.h>
@@ -43,6 +44,7 @@ static i2c_bb_state m_i2c_bb;
 static spi_bb_state m_spi_bb;
 static ICM20948_STATE m_icm20948_state;
 static BMI_STATE m_bmi_state;
+static DMU11State m_dmu11_state;
 static imu_config m_settings;
 static systime_t init_time;
 static bool imu_ready;
@@ -157,14 +159,17 @@ void imu_init(imu_config *set) {
 		imu_init_icm20948(HW_I2C_SDA_PORT, HW_I2C_SDA_PIN,
 				HW_I2C_SCL_PORT, HW_I2C_SCL_PIN, 0);
 	} else if (set->type == IMU_TYPE_EXTERNAL_BMI160) {
-		imu_init_bmi160_i2c(HW_I2C_SDA_PORT, HW_I2C_SDA_PIN,
-				HW_I2C_SCL_PORT, HW_I2C_SCL_PIN);
+		// imu_init_bmi160_i2c(HW_I2C_SDA_PORT, HW_I2C_SDA_PIN,
+		// 		HW_I2C_SCL_PORT, HW_I2C_SCL_PIN);
+
+		commands_printf("Initializing DMU11 IMU over UART");
+		imu_init_dmu11_uart(UART_PORT_COMM_HEADER);
 	} else if(set->type == IMU_TYPE_EXTERNAL_LSM6DS3) {
 		imu_init_lsm6ds3(HW_I2C_SDA_PORT, HW_I2C_SDA_PIN,
 				HW_I2C_SCL_PORT, HW_I2C_SCL_PIN);
-	} else if (set->type == IMU_TYPE_EXTERNAL_BMI160) {
-		imu_init_bmi160_i2c(HW_I2C_SDA_PORT, HW_I2C_SDA_PIN,
-				HW_I2C_SCL_PORT, HW_I2C_SCL_PIN);
+	} else if (set->type == IMU_TYPE_EXTERNAL_DMU11) {
+		commands_printf("Initializing DMU11 IMU over UART");
+		imu_init_dmu11_uart(UART_PORT_COMM_HEADER);
 	}
 
 	terminal_register_command_callback(
@@ -212,6 +217,14 @@ void imu_init_icm20948(stm32_gpio_t *sda_gpio, int sda_pin,
 			m_thd_work_area, sizeof(m_thd_work_area));
 	icm20948_set_read_callback(&m_icm20948_state, imu_read_callback);
 }
+
+void imu_init_dmu11_uart(int8_t uart_port) {
+	imu_stop();
+	m_dmu11_state.uart_port = uart_port;
+	dmu11_init(&m_dmu11_state, m_thd_work_area, sizeof(m_thd_work_area));
+	// dmu11_set_read_callback(&m_dmu11_state, imu_read_callback);
+}
+
 
 void imu_init_bmi160_i2c(stm32_gpio_t *sda_gpio, int sda_pin,
 		stm32_gpio_t *scl_gpio, int scl_pin) {

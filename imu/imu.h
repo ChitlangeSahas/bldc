@@ -41,6 +41,8 @@ void imu_init_bmi160_spi(
         stm32_gpio_t *sck_gpio, int sck_pin,
         stm32_gpio_t *mosi_gpio, int mosi_pin,
         stm32_gpio_t *miso_gpio, int miso_pin);
+void imu_init_dmu11_uart(int8_t uart_port);
+
 void imu_stop(void);
 bool imu_startup_done(void);
 float imu_get_roll(void);
