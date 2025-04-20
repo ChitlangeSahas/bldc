@@ -118,6 +118,12 @@ bool parse_dmu11_buffer_data_into_state(const uint8_t* msgBuffer, size_t msgBuff
     // Parse checksum
     dmu11State->checksum = (uint16_t)(msgBuffer[66] << 8) | msgBuffer[67];
 
+
+    float accel[3] = {dmu11State->axisXAcceleration, dmu11State->axisYAcceleration, dmu11State->axisZAcceleration};
+    float gyro[3] = {dmu11State->axisXRate, dmu11State->axisYRate, dmu11State->axisZRate};
+    float mag[3] = {0,0,0};
+    dmu11State->read_callback(accel, gyro, mag);
+
     return true;
 }
 

@@ -222,7 +222,7 @@ void imu_init_dmu11_uart(int8_t uart_port) {
 	imu_stop();
 	m_dmu11_state.uart_port = uart_port;
 	dmu11_init(&m_dmu11_state, m_thd_work_area, sizeof(m_thd_work_area));
-	// dmu11_set_read_callback(&m_dmu11_state, imu_read_callback);
+	dmu11_set_read_callback(&m_dmu11_state, imu_read_callback);
 }
 
 
